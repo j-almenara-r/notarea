@@ -24,7 +24,7 @@ This repository contains an Android application for dictating notes while drivin
 ### Build Instructions
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone <your-repository-url>
 cd studious-garbanzo
 
 # Build the project using Gradle wrapper
