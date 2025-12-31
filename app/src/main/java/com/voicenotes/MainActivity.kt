@@ -90,7 +90,8 @@ class MainActivity : AppCompatActivity() {
             if (spokenText.isNotEmpty()) {
                 val timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
                 val currentText = notesTextView.text.toString()
-                val newText = if (currentText.isEmpty()) {
+                val placeholderText = getString(R.string.notes_placeholder)
+                val newText = if (currentText.isEmpty() || currentText == placeholderText) {
                     "[$timestamp] $spokenText"
                 } else {
                     "$currentText\n\n[$timestamp] $spokenText"

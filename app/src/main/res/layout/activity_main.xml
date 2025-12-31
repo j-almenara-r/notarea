@@ -11,7 +11,7 @@
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Voice Notes"
+        android:text="@string/title_text"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -34,10 +34,8 @@
             android:id="@+id/notesTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
             android:padding="16dp"
-            android:text="Your notes will appear here..."
-            android:textColor="@android:color/black"
+            android:text="@string/notes_placeholder"
             android:textSize="16sp" />
     </ScrollView>
 
@@ -45,7 +43,7 @@
         android:id="@+id/voiceButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="🎤 Tap to Speak"
+        android:text="@string/voice_button_text"
         android:textSize="18sp"
         android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
