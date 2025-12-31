@@ -17,17 +17,17 @@ This repository contains an Android application for dictating notes while drivin
 
 ### Prerequisites
 - Android Studio (latest stable version)
-- Android SDK (API level to be determined based on target devices)
+- Android SDK (API level 21+ for Android Auto compatibility)
 - Android Auto Development Device or Emulator
 - Java Development Kit (JDK 11 or later)
 
 ### Build Instructions
 ```bash
 # Clone the repository
-git clone https://github.com/j-almenara-r/studious-garbanzo.git
+git clone <repository-url>
 cd studious-garbanzo
 
-# Build the project (to be updated when build system is configured)
+# Build the project using Gradle wrapper
 ./gradlew build
 
 # Run tests
