@@ -185,13 +185,20 @@ class MainActivity : AppCompatActivity() {
                 SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
             }
 
+            // Build the complete markdown content
+            val markdownContent = buildString {
+                append("# Voice Notes Export\n\n")
+                append("**Exported on:** $readableTimestamp\n\n")
+                append("---\n\n")
+                append(currentText)
+                append("\n")
+            }
+
             // Write content to the file with markdown formatting
             contentResolver.openOutputStream(uri)?.use { outputStream ->
-                outputStream.write("# Voice Notes Export\n\n".toByteArray())
-                outputStream.write("**Exported on:** $readableTimestamp\n\n".toByteArray())
-                outputStream.write("---\n\n".toByteArray())
-                outputStream.write(currentText.toByteArray())
-                outputStream.write("\n".toByteArray())
+                outputStream.write(markdownContent.toByteArray())
+            } ?: run {
+                throw Exception("Failed to open output stream")
             }
 
             Toast.makeText(
