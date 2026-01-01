@@ -6,19 +6,29 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.widget.Button
+import android.view.View
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import java.text.SimpleDateFormat
-import java.util.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var voiceButton: Button
-    private lateinit var notesTextView: TextView
+    private lateinit var fabNewNote: FloatingActionButton
+    private lateinit var notesRecyclerView: RecyclerView
+    private lateinit var emptyStateTextView: TextView
+    private lateinit var notesAdapter: NotesAdapter
+    private val notes = mutableListOf<Note>()
+    
+    private var currentNoteTitle: String? = null
+    
     private val RECORD_AUDIO_PERMISSION_CODE = 1
     private val SPEECH_REQUEST_CODE = 0
 
@@ -26,11 +36,47 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        voiceButton = findViewById(R.id.voiceButton)
-        notesTextView = findViewById(R.id.notesTextView)
+        fabNewNote = findViewById(R.id.fabNewNote)
+        notesRecyclerView = findViewById(R.id.notesRecyclerView)
+        emptyStateTextView = findViewById(R.id.emptyStateTextView)
 
-        voiceButton.setOnClickListener {
-            checkPermissionAndStartSpeechRecognition()
+        notesAdapter = NotesAdapter(notes)
+        notesRecyclerView.layoutManager = LinearLayoutManager(this)
+        notesRecyclerView.adapter = notesAdapter
+
+        fabNewNote.setOnClickListener {
+            showNewNoteDialog()
+        }
+        
+        updateEmptyState()
+    }
+
+    private fun showNewNoteDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_note_title, null)
+        val titleEditText = dialogView.findViewById<EditText>(R.id.noteTitleEditText)
+
+        AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setPositiveButton(R.string.create_button) { _, _ ->
+                val title = titleEditText.text.toString().trim()
+                currentNoteTitle = if (title.isEmpty()) {
+                    getString(R.string.default_note_title)
+                } else {
+                    title
+                }
+                checkPermissionAndStartSpeechRecognition()
+            }
+            .setNegativeButton(R.string.cancel_button, null)
+            .show()
+    }
+
+    private fun updateEmptyState() {
+        if (notes.isEmpty()) {
+            emptyStateTextView.visibility = View.VISIBLE
+            notesRecyclerView.visibility = View.GONE
+        } else {
+            emptyStateTextView.visibility = View.GONE
+            notesRecyclerView.visibility = View.VISIBLE
         }
     }
 
@@ -87,16 +133,15 @@ class MainActivity : AppCompatActivity() {
             val results = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             val spokenText = results?.get(0) ?: ""
 
-            if (spokenText.isNotEmpty()) {
-                val timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
-                val currentText = notesTextView.text.toString()
-                val placeholderText = getString(R.string.notes_placeholder)
-                val newText = if (currentText.isEmpty() || currentText == placeholderText) {
-                    "[$timestamp] $spokenText"
-                } else {
-                    "$currentText\n\n[$timestamp] $spokenText"
-                }
-                notesTextView.text = newText
+            val noteTitle = currentNoteTitle
+            if (spokenText.isNotEmpty() && noteTitle != null) {
+                val note = Note(
+                    title = noteTitle,
+                    content = spokenText
+                )
+                notesAdapter.addNote(note)
+                updateEmptyState()
+                currentNoteTitle = null
             }
         }
     }

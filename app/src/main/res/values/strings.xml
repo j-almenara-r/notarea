@@ -4,4 +4,11 @@
     <string name="notes_placeholder">Your notes will appear here...</string>
     <string name="voice_button_text">🎤 Tap to Speak</string>
     <string name="title_text">Voice Notes</string>
+    <string name="new_note_description">Create new note</string>
+    <string name="empty_notes_message">No notes yet.\nTap the + button to create your first note!</string>
+    <string name="new_note_title">New Note</string>
+    <string name="note_title_hint">Enter note title</string>
+    <string name="create_button">Create</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="default_note_title">Untitled Note</string>
 </resources>
