@@ -25,7 +25,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/voiceButton"
+        app:layout_constraintBottom_toTopOf="@+id/exportButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/titleTextView">
@@ -38,6 +38,18 @@
             android:text="@string/notes_placeholder"
             android:textSize="16sp" />
     </ScrollView>
+
+    <Button
+        android:id="@+id/exportButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/export_button_text"
+        android:textSize="16sp"
+        android:padding="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/voiceButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="8dp" />
 
     <Button
         android:id="@+id/voiceButton"
