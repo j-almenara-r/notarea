@@ -71,11 +71,12 @@ jobs:
     - name: Build Debug APK
       run: ./gradlew assembleDebug --stacktrace
     
-    - name: Get version info
+    - name: Extract version info
       id: version
       run: |
-        VERSION_NAME=$(grep "versionName" app/build.gradle | awk '{print $2}' | tr -d '"')
-        VERSION_CODE=$(grep "versionCode" app/build.gradle | awk '{print $2}')
+        # Extract version from build output or use defaults
+        VERSION_CODE=$(grep -oP 'versionCode\s+\K\d+' app/build.gradle || echo "1")
+        VERSION_NAME=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle || echo "1.0")
         echo "name=$VERSION_NAME" >> $GITHUB_OUTPUT
         echo "code=$VERSION_CODE" >> $GITHUB_OUTPUT
     
@@ -95,6 +96,8 @@ jobs:
           Commit: ${{ github.sha }}
           Branch: ${{ github.ref_name }}
 ```
+
+**Note on Version Extraction:** The workflow above uses regex to extract version info from `build.gradle`. For a more robust solution, you could create custom Gradle tasks to output version info, but the regex approach works well for most standard Gradle files.
 
 ## Additional Secrets Needed
 
