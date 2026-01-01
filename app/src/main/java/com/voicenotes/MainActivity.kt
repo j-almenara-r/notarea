@@ -3,8 +3,8 @@ package com.voicenotes
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.widget.Button
@@ -13,8 +13,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import java.io.File
-import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -27,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var notesTextView: TextView
     private val RECORD_AUDIO_PERMISSION_CODE = 1
     private val SPEECH_REQUEST_CODE = 0
+    private val CREATE_FILE_REQUEST_CODE = 2
     
     companion object {
         private const val ISO_8601_FILENAME_PATTERN = "yyyy-MM-dd'T'HH-mm-ss"
@@ -113,6 +112,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 notesTextView.text = newText
             }
+        } else if (requestCode == CREATE_FILE_REQUEST_CODE && resultCode == RESULT_OK) {
+            data?.data?.let { uri ->
+                writeNotesToUri(uri)
+            }
         }
     }
 
@@ -146,14 +149,35 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        // Generate ISO 8601 timestamp for filename (filename-safe format)
+        val filenameTimestamp = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern(ISO_8601_FILENAME_PATTERN))
+        } else {
+            SimpleDateFormat(ISO_8601_FILENAME_PATTERN, Locale.getDefault()).format(Date())
+        }
+        
+        // Use Storage Access Framework to let user choose location
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "text/markdown"
+            putExtra(Intent.EXTRA_TITLE, "voice-notes-$filenameTimestamp.md")
+        }
+
         try {
-            // Generate ISO 8601 timestamp for filename (filename-safe format)
-            val filenameTimestamp = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern(ISO_8601_FILENAME_PATTERN))
-            } else {
-                SimpleDateFormat(ISO_8601_FILENAME_PATTERN, Locale.getDefault()).format(Date())
-            }
-            
+            startActivityForResult(intent, CREATE_FILE_REQUEST_CODE)
+        } catch (e: Exception) {
+            Toast.makeText(
+                this,
+                getString(R.string.export_error, e.message),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    private fun writeNotesToUri(uri: Uri) {
+        val currentText = notesTextView.text.toString()
+        
+        try {
             // Generate human-readable timestamp for content
             val readableTimestamp = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
@@ -161,30 +185,18 @@ class MainActivity : AppCompatActivity() {
                 SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
             }
 
-            // Create VoiceNotes directory in Documents
-            val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-            val voiceNotesDir = File(documentsDir, "VoiceNotes")
-            
-            if (!voiceNotesDir.exists()) {
-                voiceNotesDir.mkdirs()
-            }
-
-            // Create the markdown file
-            val filename = "voice-notes-$filenameTimestamp.md"
-            val file = File(voiceNotesDir, filename)
-
             // Write content to the file with markdown formatting
-            FileWriter(file).use { writer ->
-                writer.write("# Voice Notes Export\n\n")
-                writer.write("**Exported on:** $readableTimestamp\n\n")
-                writer.write("---\n\n")
-                writer.write(currentText)
-                writer.write("\n")
+            contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.write("# Voice Notes Export\n\n".toByteArray())
+                outputStream.write("**Exported on:** $readableTimestamp\n\n".toByteArray())
+                outputStream.write("---\n\n".toByteArray())
+                outputStream.write(currentText.toByteArray())
+                outputStream.write("\n".toByteArray())
             }
 
             Toast.makeText(
                 this,
-                getString(R.string.export_success, file.absolutePath),
+                getString(R.string.export_success_new),
                 Toast.LENGTH_LONG
             ).show()
 
