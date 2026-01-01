@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -110,7 +111,7 @@ class MainActivity : AppCompatActivity() {
                 RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
             )
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, java.util.Locale.getDefault())
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
             putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak your note...")
         }
 
@@ -132,9 +133,10 @@ class MainActivity : AppCompatActivity() {
             val results = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             val spokenText = results?.get(0) ?: ""
 
-            if (spokenText.isNotEmpty() && currentNoteTitle != null) {
+            val noteTitle = currentNoteTitle
+            if (spokenText.isNotEmpty() && noteTitle != null) {
                 val note = Note(
-                    title = currentNoteTitle!!,
+                    title = noteTitle,
                     content = spokenText
                 )
                 notesAdapter.addNote(note)
