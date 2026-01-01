@@ -32,6 +32,8 @@ You're currently using **GitHub Releases** (build-13), which is a simple but man
 4. Update GitHub Actions workflow to upload APK to Firebase
 5. Invite testers via email - they'll receive links to install
 
+**📖 See detailed setup instructions in [FIREBASE_SETUP.md](FIREBASE_SETUP.md)**
+
 **Installation on phone:**
 - Testers install the Firebase App Distribution app
 - They receive notifications when new builds are available
