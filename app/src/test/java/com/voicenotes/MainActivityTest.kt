@@ -141,9 +141,10 @@ class MainActivityTest {
             val notesTextView = activity.findViewById<TextView>(R.id.notesTextView)
             val text = notesTextView.text.toString()
             
-            // Text should either be empty or contain the placeholder
-            assertTrue("Notes text view should be initialized", 
-                text.isEmpty() || text.isNotEmpty())
+            // Text should either be empty or contain the placeholder text
+            val placeholderText = activity.getString(R.string.notes_placeholder)
+            assertTrue("Notes text view should be empty or contain placeholder", 
+                text.isEmpty() || text == placeholderText)
         }
     }
 }
