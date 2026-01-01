@@ -12,7 +12,13 @@ class VoiceNotesMediaBrowserService : MediaBrowserServiceCompat() {
 
     companion object {
         private const val ROOT_ID = "voice_notes_root"
-        private const val EMPTY_ROOT_ID = "empty_root"
+        
+        // Known Android Auto package names
+        private val ALLOWED_PACKAGES = setOf(
+            "com.google.android.projection.gearhead",  // Android Auto
+            "com.google.android.apps.automotive.inputmethod",  // Android Automotive OS
+            "com.google.android.carassistant"  // Google Assistant for Android Auto
+        )
     }
 
     override fun onCreate() {
@@ -24,9 +30,15 @@ class VoiceNotesMediaBrowserService : MediaBrowserServiceCompat() {
         clientPackageName: String,
         clientUid: Int,
         rootHints: Bundle?
-    ): BrowserRoot {
-        // Allow Android Auto to connect to this service
-        return BrowserRoot(ROOT_ID, null)
+    ): BrowserRoot? {
+        // Allow Android Auto and other trusted automotive clients to connect
+        // For security, we validate the client package name
+        return if (ALLOWED_PACKAGES.contains(clientPackageName)) {
+            BrowserRoot(ROOT_ID, null)
+        } else {
+            // Return null to reject untrusted clients
+            null
+        }
     }
 
     override fun onLoadChildren(
