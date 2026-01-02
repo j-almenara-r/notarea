@@ -6,6 +6,7 @@
     <string name="title_text">Voice Notes</string>
     <string name="export_button_text">📄 Export to Markdown</string>
     <string name="export_success">Notes exported successfully to: %1$s</string>
+    <string name="export_success_new">Notes exported successfully! Check your chosen location.</string>
     <string name="export_error">Failed to export notes: %1$s</string>
     <string name="export_no_notes">No notes to export</string>
 </resources>
