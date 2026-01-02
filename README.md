@@ -65,6 +65,14 @@ An Android app designed for dictating notes while driving, with a simple and saf
 
 ## Installing on Your Phone
 
+### Quick Install (Recommended for Development)
+
+The fastest way to install during development:
+```bash
+./gradlew installDebug
+```
+This builds and installs directly to your connected device in one command!
+
 ### Option 1: Direct Install via USB
 
 1. Enable Developer Options and USB Debugging on your Android device
@@ -77,6 +85,10 @@ An Android app designed for dictating notes while driving, with a simple and saf
 2. On your phone, locate the APK file using a file manager
 3. Tap the APK file to install
 4. You may need to enable "Install from Unknown Sources" in your phone's settings
+
+### More Distribution Options
+
+For information about distributing your app via Firebase, Google Play Store, F-Droid, and other channels, see **[APP_DISTRIBUTION.md](APP_DISTRIBUTION.md)**.
 
 ## Usage
 
