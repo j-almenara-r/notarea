@@ -2,6 +2,8 @@ package com.voicenotes
 
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.session.MediaSessionCompat
+import android.util.Log
 import androidx.media.MediaBrowserServiceCompat
 
 /**
@@ -11,6 +13,7 @@ import androidx.media.MediaBrowserServiceCompat
 class VoiceNotesMediaBrowserService : MediaBrowserServiceCompat() {
 
     companion object {
+        private const val TAG = "VoiceNotesMediaBrowser"
         private const val ROOT_ID = "voice_notes_root"
         
         // Known Android Auto package names
@@ -21,9 +24,49 @@ class VoiceNotesMediaBrowserService : MediaBrowserServiceCompat() {
         )
     }
 
+    private lateinit var mediaSession: MediaSessionCompat
+
     override fun onCreate() {
         super.onCreate()
-        sessionToken = null
+        Log.d(TAG, "onCreate: Initializing MediaBrowserService")
+        
+        // Create MediaSession for Android Auto compatibility
+        mediaSession = MediaSessionCompat(this, TAG).apply {
+            // Set flags for media button and transport controls
+            setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
+                    MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
+            
+            // Set callback for playback controls
+            setCallback(object : MediaSessionCompat.Callback() {
+                override fun onPlay() {
+                    Log.d(TAG, "MediaSession.Callback: onPlay")
+                    // Handle play action - for voice notes app, this could trigger recording
+                }
+                
+                override fun onPause() {
+                    Log.d(TAG, "MediaSession.Callback: onPause")
+                    // Handle pause action
+                }
+                
+                override fun onStop() {
+                    Log.d(TAG, "MediaSession.Callback: onStop")
+                    // Handle stop action
+                }
+            })
+            
+            // Activate the session
+            isActive = true
+        }
+        
+        // Set the session token - required for Android Auto
+        sessionToken = mediaSession.sessionToken
+        Log.d(TAG, "onCreate: MediaSession created and activated")
+    }
+
+    override fun onDestroy() {
+        Log.d(TAG, "onDestroy: Releasing MediaSession")
+        mediaSession.release()
+        super.onDestroy()
     }
 
     override fun onGetRoot(
@@ -31,13 +74,18 @@ class VoiceNotesMediaBrowserService : MediaBrowserServiceCompat() {
         clientUid: Int,
         rootHints: Bundle?
     ): BrowserRoot? {
+        Log.d(TAG, "onGetRoot: clientPackageName=$clientPackageName, clientUid=$clientUid")
+        
         // Allow Android Auto and other trusted automotive clients to connect
-        // For security, we validate the client package name
+        // For debugging, we're more permissive but log all connection attempts
         return if (ALLOWED_PACKAGES.contains(clientPackageName)) {
+            Log.d(TAG, "onGetRoot: Allowing known package: $clientPackageName")
             BrowserRoot(ROOT_ID, null)
         } else {
-            // Return null to reject untrusted clients
-            null
+            // For debugging Android Auto issues, allow connections but log them
+            Log.w(TAG, "onGetRoot: Unknown package attempting connection: $clientPackageName")
+            // Still allow connection for debugging - can be restricted later for security
+            BrowserRoot(ROOT_ID, null)
         }
     }
 
@@ -45,6 +93,7 @@ class VoiceNotesMediaBrowserService : MediaBrowserServiceCompat() {
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
     ) {
+        Log.d(TAG, "onLoadChildren: parentId=$parentId")
         // Return empty list as this app doesn't provide media items
         // It's primarily a voice note-taking app
         result.sendResult(mutableListOf())
