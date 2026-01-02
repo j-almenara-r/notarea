@@ -65,7 +65,10 @@ class VoiceNotesMediaBrowserService : MediaBrowserServiceCompat() {
 
     override fun onDestroy() {
         Log.d(TAG, "onDestroy: Releasing MediaSession")
-        mediaSession.release()
+        // Check if mediaSession was initialized before releasing
+        if (::mediaSession.isInitialized) {
+            mediaSession.release()
+        }
         super.onDestroy()
     }
 
@@ -84,6 +87,7 @@ class VoiceNotesMediaBrowserService : MediaBrowserServiceCompat() {
         } else {
             // For debugging Android Auto issues, allow connections but log them
             Log.w(TAG, "onGetRoot: Unknown package attempting connection: $clientPackageName")
+            // TODO: For production, consider returning null for unknown packages to enhance security
             // Still allow connection for debugging - can be restricted later for security
             BrowserRoot(ROOT_ID, null)
         }
